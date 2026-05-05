@@ -29,7 +29,7 @@ def valj_farg():
     print("4. Blå")
     print("5. Ingen färg")
 
-    val = input("Val: ")
+    val = input("Val: ").strip()
 
     if val == "1":
         return Farger.ROD
@@ -57,6 +57,17 @@ def rita_kvadrat(sida, tecken, farg=""):
         print(farg + (tecken + " ") * sida + Farger.RESET)
 
 
+def rita_ihalig_kvadrat(sida, tecken, farg=""):
+    """
+    Ritar en ihålig kvadrat (endast kantlinjen).
+    """
+    for i in range(sida):
+        if i == 0 or i == sida - 1:
+            print(tecken * sida)
+        else:
+            print(farg + tecken + " " + "  " * (sida - 2) + tecken + " " + Farger.RESET)
+
+
 def rita_triangel(hojd, tecken, farg=""):
     """
     Ritar en rätvinklig triangel.
@@ -67,6 +78,14 @@ def rita_triangel(hojd, tecken, farg=""):
     """
     for i in range(1, hojd + 1):
         print(farg + (tecken + " ") * i + Farger.RESET)
+
+
+def rita_omvand_triangel(hojd, tecken, farg=""):
+    """
+    Ritar en omvänd triangel (basen upp, spetsen ner).
+    """
+    for i in range(hojd, 0, -1):
+        print(farg + (tecken + " ")* i + Farger.RESET)
 
 
 def rita_cirkel(radie, tecken, farg=""):
@@ -103,85 +122,21 @@ def rita_blomma(kronblad, storlek, tecken, farg=""):
     print(" " * storlek + "|")
 
 
-# === HUVUDPROGRAM ===
-
-def huvudprogram():
-    """
-    Huvudprogrammet som styr menyn och programflödet.
-    """
-    while True:
-        print("\n--- ASCII MÖNSTER ---")
-        print("1. Rita kvadrat")
-        print("2. Rita triangel")
-        print("3. Rita cirkel")
-        print("4. Rita blomma")
-        print("5. Avsluta")
-
-        val = input("Valj: ")
-
-        if val == "1":
-            sida = int(input("Sida: "))
-            tecken = input("Tecken (t.ex. *): ")
-            farg = valj_farg()
-            rita_kvadrat(sida, tecken, farg)
-
-        elif val == "2":
-            hojd = int(input("Höjd: "))
-            tecken = input("Tecken (t.ex. *): ")
-            farg = valj_farg()
-            rita_triangel(hojd, tecken, farg)
-
-        elif val == "3":
-            radie = int(input("Radie: "))
-            tecken = input("Tecken (t.ex. *): ")
-            farg = valj_farg()
-            rita_cirkel(radie, tecken, farg)
-
-        elif val == "4":
-            kronblad = int(input("Antal kronblad: "))
-            storlek = int(input("Storlek: "))
-            tecken = input("Tecken (t.ex. *): ")
-            farg = valj_farg()
-            rita_blomma(kronblad, storlek, tecken, farg)
-
-        elif val == "5":
-            print("Hej då!")
-            break
-
-        else:
-            print("Ogiltigt val, försök igen.")
-
-
-# === EXTRA FUNKTIONER FÖR UTMANINGAR ===
-
-def rita_ihalig_kvadrat(sida, tecken):
-    """
-    Ritar en ihålig kvadrat (endast kantlinjen).
-    """
-    for i in range(sida):
-        if i == 0 or i == sida - 1:
-            print(tecken * sida)
-        else:
-            print(tecken + " " * (sida - 2) + tecken)
-
-
-def rita_omvand_triangel(hojd, tecken):
-    """
-    Ritar en omvänd triangel (basen upp, spetsen ner).
-    """
-    # TODO: Implementera funktionen
-    # Tips: for i in range(hojd, 0, -1): print(tecken * i)
-    pass
-
-
-def rita_diamant(hojd, tecken):
+def rita_diamant(hojd, tecken, farg=""):
     """
     Ritar en diamant (två trianglar som möts).
     """
-    # TODO: Implementera funktionen
-    # Tips: Först en triangel uppåt, sedan en nedåt (utan mittenraden två gånger)
-    pass
+    for i in range(1, hojd + 1):
+        mellanslag = " " * (hojd - i)
+        rad = (tecken + " ") * i
+        print(farg + mellanslag + rad + Farger.RESET)
 
+    for i in range(hojd - 1, 0, -1):
+        mellanslag = " " * (hojd - i)
+        rad = (tecken + " ")* i
+        print(farg + mellanslag + rad + Farger.RESET)
+
+# === SPARA ALLA FIGURER ===
 
 def spara_till_fil(figur_namn, innehall, filnamn="figur.txt"):
     """
@@ -192,9 +147,103 @@ def spara_till_fil(figur_namn, innehall, filnamn="figur.txt"):
         innehall (str): Figurens textinnehåll
         filnamn (str): Namn på filen att spara till
     """
-    # TODO: Implementera funktionen
-    # Tips: Använd filhantering från projekt 1
-    pass
+    try:
+        with open(filnamn, "w", encoding="utf-8") as fil:
+            fil.write(f"{figur_namn}\n")
+            fil.write(innehall)
+        print(f"Figuren sparades i {filnamn}")
+    except Exception as e:
+        print("Fel vid sparning:", e)
+
+
+# === HUVUDPROGRAM ===
+
+def huvudprogram():
+
+    alla_figurer = []
+
+    while True:
+        print("\n--- ASCII MÖNSTER ---")
+        print("1. Kvadrat")
+        print("2. Triangel")
+        print("3. Cirkel")
+        print("4. Blomma")
+        print("5. Diamant")
+        print("6. Avsluta")
+        print("7. Spara alla figurer")
+
+        val = input("Val: ").strip()
+
+        # === KVADRAT ===
+        if val == "1":
+            sida = int(input("Sida: "))
+            tecken = input("Tecken: ")
+            farg = valj_farg()
+
+            print("1. Fylld kvadrat")
+            print("2. Ihålig kvadrat")
+            val2 = input("Val: ").strip()
+
+            if val2 == "1":
+                figur = rita_kvadrat(sida, tecken, farg)
+                visa_eller_spara("Fylld kvadrat", figur)
+
+            elif val2 == "2":
+                figur = rita_ihalig_kvadrat(sida, tecken, farg)
+                visa_eller_spara("Ihålig kvadrat", figur)
+
+        # === TRIANGEL ===
+        elif val == "2":
+            hojd = int(input("Höjd: "))
+            tecken = input("Tecken: ")
+            farg = valj_farg()
+
+            print("1. Vanlig triangel")
+            print("2. Omvänd triangel")
+            val2 = input("Val: ")
+
+            if val2 == "1":
+                figur = rita_triangel(hojd, tecken, farg)
+                visa_eller_spara("Triangel", figur)
+
+            elif val2 == "2":
+                figur = rita_omvand_triangel(hojd, tecken, farg)
+                visa_eller_spara("Omvänd triangel", figur)
+
+        # === CIRKEL ===
+        elif val == "3":
+            radie = int(input("Radie: "))
+            tecken = input("Tecken: ")
+            farg = valj_farg()
+
+            figur = rita_cirkel(radie, tecken, farg)
+            visa_eller_spara("Cirkel", figur)
+
+        # === BLOMMA ===
+        elif val == "4":
+            kronblad = int(input("Kronblad: "))
+            storlek = int(input("Storlek: "))
+            tecken = input("Tecken: ")
+            farg = valj_farg()
+
+            figur = rita_blomma(kronblad, storlek, tecken, farg)
+            visa_eller_spara("Blomma", figur)
+
+        # === DIAMANT ===
+        elif val == "5":
+            hojd = int(input("Höjd: "))
+            tecken = input("Tecken: ")
+            farg = valj_farg()
+
+            figur = rita_diamant(hojd, tecken, farg)
+            visa_eller_spara("Diamant", figur)
+
+        elif val == "6":
+            print("Hej då!")
+            break
+
+        else:
+            print("Ogiltigt val.")
 
 
 # Starta programmet om filen körs direkt
