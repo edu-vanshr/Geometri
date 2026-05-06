@@ -1,27 +1,27 @@
 """
 Projekt 3b: Geometriska mönster med ASCII
 Ett menybaserat program som ritar textbaserade geometriska figurer.
-
-Funktioner som ska implementeras:
-- rita_kvadrat(sida, tecken)
-- rita_triangel(hojd, tecken)
-- rita_cirkel(radie, tecken)
-- rita_blomma(kronblad, storlek, tecken)
-- huvudprogram() med meny
 """
 
 
 # === ANSI-FÄRGER ===
 
+
 class Farger:
+    # ANSI-koder används för att färgsätta text i terminalen
     ROD = "\033[91m"
     GRON = "\033[92m"
     GUL = "\033[93m"
     BLA = "\033[94m"
-    RESET = "\033[0m"
+    RESET = "\033[0m"  # Återställer färgen efter utskrift
 
 
 def valj_farg():
+    """
+    Låter användaren välja färg från en meny.
+    Returnerar en ANSI-kod som används i utskriften.
+    """
+
     print("Välj färg:")
     print("1. Röd")
     print("2. Grön")
@@ -31,6 +31,7 @@ def valj_farg():
 
     val = input("Val: ").strip()
 
+    # Returnerar rätt färg beroende på val
     if val == "1":
         return Farger.ROD
     elif val == "2":
@@ -40,186 +41,224 @@ def valj_farg():
     elif val == "4":
         return Farger.BLA
     else:
-        return ""
+        return ""  # Ingen färg
 
 
 # === FIGURER ===
 
+
+# ---------------- KVADRAT ----------------
 def rita_kvadrat(sida, tecken, farg=""):
     """
     Ritar en fylld kvadrat.
 
-    Parametrar:
-        sida (int): Längden på sidan (antal tecken)
-        tecken (str): Tecknet som används för att rita
+    sida = storlek på kvadraten
+    tecken = symbol som används
+    farg = valfri färg
     """
-    for i in range(sida):
-        print(farg + (tecken + " ") * sida + Farger.RESET)
 
+    resultat = ""  # sparar hela figuren som text
 
-def rita_ihalig_kvadrat(sida, tecken, farg=""):
-    """
-    Ritar en ihålig kvadrat (endast kantlinjen).
-    """
-    for i in range(sida):
-        if i == 0 or i == sida - 1:
-            print(tecken * sida)
-        else:
-            print(farg + tecken + " " + "  " * (sida - 2) + tecken + " " + Farger.RESET)
+    for _ in range(sida):
+        # Skapar en rad med lika många tecken som sidan
+        rad = farg + (tecken + " ") * sida + Farger.RESET
+        print(rad)
+        resultat += rad + "\n"
 
+    return resultat
 
+# ---------------- TRIANGEL ----------------
 def rita_triangel(hojd, tecken, farg=""):
     """
-    Ritar en rätvinklig triangel.
-
-    Parametrar:
-        hojd (int): Triangelns höjd (antal rader)
-        tecken (str): Tecknet som används för att rita
+    Ritar en rätvinklig triangel som växer rad för rad.
     """
+
+    resultat = ""
+
     for i in range(1, hojd + 1):
-        print(farg + (tecken + " ") * i + Farger.RESET)
+        # varje rad får fler tecken än den förra
+        rad = farg + (tecken + " ") * i + Farger.RESET
+        print(rad)
+        resultat += rad + "\n"
 
+    return resultat
 
+# ---------------- OMVÄND TRIANGEL ----------------
 def rita_omvand_triangel(hojd, tecken, farg=""):
     """
-    Ritar en omvänd triangel (basen upp, spetsen ner).
+    Ritar en triangel som minskar rad för rad.
     """
+
+    resultat = ""
+
     for i in range(hojd, 0, -1):
-        print(farg + (tecken + " ")* i + Farger.RESET)
+        # börjar stort och blir mindre
+        rad = farg + (tecken + " ") * i + Farger.RESET
+        print(rad)
+        resultat += rad + "\n"
 
+    return resultat
 
+# ---------------- IHÅLIG KVADRAT ----------------
+def rita_ihalig_kvadrat(sida, tecken, farg=""):
+    """
+    Ritar en kvadrat där bara kanterna syns.
+    """
+
+    resultat = ""
+
+    for i in range(sida):
+
+        # första och sista raden är fyllda
+        if i == 0 or i == sida - 1:
+            rad = farg + tecken * sida + Farger.RESET
+        else:
+            # mittenrader: kant + tomrum + kant
+            rad = farg + tecken + " " * (sida - 2) + tecken + Farger.RESET
+
+        print(rad)
+        resultat += rad + "\n"
+
+    return resultat
+
+# ---------------- DIAMANT ----------------
+def rita_diamant(hojd, tecken, farg=""):
+    """
+    Ritar en diamant genom två trianglar:
+    - en uppåt
+    - en nedåt
+    """
+
+    resultat = ""
+
+    # --------------------
+    # Övre delen
+    # --------------------
+    for i in range(1, hojd + 1):
+
+        # centrerar genom mellanslag
+        rad = " " * (hojd - i) + (tecken + " ") * i
+        rad = farg + rad + Farger.RESET
+
+        print(rad)
+        resultat += rad + "\n"
+
+    # --------------------
+    # Nedre delen
+    # --------------------
+    for i in range(hojd - 1, 0, -1):
+
+        rad = " " * (hojd - i) + (tecken + " ") * i
+        rad = farg + rad + Farger.RESET
+
+        print(rad)
+        resultat += rad + "\n"
+
+    return resultat
+
+# ---------------- CIRKEL ----------------
 def rita_cirkel(radie, tecken, farg=""):
     """
-    Ritar en cirkel med ASCII-tecken.
-    Använder Pythagoras sats (x² + y² ≤ r²) för att avgöra om en punkt är innanför.
-
-    Parametrar:
-        radie (int): Cirkelns radie
-        tecken (str): Tecknet som används för att rita
+    Ritar en cirkel med hjälp av matematik:
+    x² + y² ≤ r²
     """
+
+    resultat = ""
+
+    # går igenom y-led (top till botten)
     for y in range(-radie, radie + 1):
+
         rad = ""
+
+        # går igenom x-led (vänster till höger)
         for x in range(-radie, radie + 1):
+
+            # kollar om punkten är inom cirkeln
             if x*x + y*y <= radie*radie:
                 rad += farg + tecken + " " + Farger.RESET
             else:
-                rad += "  "
+                rad += "  "  # tom plats utanför cirkeln
+
         print(rad)
+        resultat += rad + "\n"
 
+    return resultat
 
+# ---------------- BLOMMA ----------------
 def rita_blomma(kronblad, storlek, tecken, farg=""):
     """
-    Ritar en enkel blomma genom att kombinera flera kvadrater.
-
-    Parametrar:
-        kronblad (int): Antal kronblad
-        storlek (int): Storleken på varje kronblad
-        tecken (str): Tecknet som används för att rita
+    Ritar en enkel blomma genom att upprepa kvadrater.
     """
-    for i in range(kronblad):
-        rita_kvadrat(storlek, tecken, farg)
-        print(" ")
-    print(" " * storlek + "|")
 
+    resultat = ""
 
-def rita_diamant(hojd, tecken, farg=""):
-    """
-    Ritar en diamant (två trianglar som möts).
-    """
-    for i in range(1, hojd + 1):
-        mellanslag = " " * (hojd - i)
-        rad = (tecken + " ") * i
-        print(farg + mellanslag + rad + Farger.RESET)
+    for _ in range(kronblad):
 
-    for i in range(hojd - 1, 0, -1):
-        mellanslag = " " * (hojd - i)
-        rad = (tecken + " ")* i
-        print(farg + mellanslag + rad + Farger.RESET)
+        # varje kronblad är en liten kvadrat
+        for _ in range(storlek):
+            rad = farg + (tecken + " ") * storlek + Farger.RESET
+            print(rad)
+            resultat += rad + "\n"
 
-# === SPARA ALLA FIGURER ===
+        print()  # mellanrum mellan kronblad
+        resultat += "\n"
 
-def spara_till_fil(figur_namn, innehall, filnamn="figur.txt"):
-    """
-    Sparar en ASCII-figur till en textfil.
-
-    Parametrar:
-        figur_namn (str): Namn på figuren
-        innehall (str): Figurens textinnehåll
-        filnamn (str): Namn på filen att spara till
-    """
-    try:
-        with open(filnamn, "w", encoding="utf-8") as fil:
-            fil.write(f"{figur_namn}\n")
-            fil.write(innehall)
-        print(f"Figuren sparades i {filnamn}")
-    except Exception as e:
-        print("Fel vid sparning:", e)
+    return resultat
 
 
 # === HUVUDPROGRAM ===
 
 def huvudprogram():
+    """
+    Styr hela programmet och visar menyn.
+    """
 
-    alla_figurer = []
+    alla_figurer = []  # sparar alla ritade figurer
 
     while True:
+
+        # meny
         print("\n--- ASCII MÖNSTER ---")
         print("1. Kvadrat")
         print("2. Triangel")
         print("3. Cirkel")
         print("4. Blomma")
-        print("5. Diamant")
-        print("6. Avsluta")
-        print("7. Spara alla figurer")
+        print("5. Omvänd triangel")
+        print("6. Diamant")
+        print("7. Ihålig kvadrat")
+        print("8. Avsluta")
+        print("9. Spara alla figurer")
 
-        val = input("Val: ").strip()
+        val = input("Välj: ")
 
-        # === KVADRAT ===
+        # ---------------- KVADRAT ----------------
         if val == "1":
             sida = int(input("Sida: "))
             tecken = input("Tecken: ")
             farg = valj_farg()
 
-            print("1. Fylld kvadrat")
-            print("2. Ihålig kvadrat")
-            val2 = input("Val: ").strip()
+            figur = rita_kvadrat(sida, tecken, farg)
+            alla_figurer.append(("Kvadrat", figur))
 
-            if val2 == "1":
-                figur = rita_kvadrat(sida, tecken, farg)
-                visa_eller_spara("Fylld kvadrat", figur)
-
-            elif val2 == "2":
-                figur = rita_ihalig_kvadrat(sida, tecken, farg)
-                visa_eller_spara("Ihålig kvadrat", figur)
-
-        # === TRIANGEL ===
+        # ---------------- TRIANGEL ----------------
         elif val == "2":
             hojd = int(input("Höjd: "))
             tecken = input("Tecken: ")
             farg = valj_farg()
 
-            print("1. Vanlig triangel")
-            print("2. Omvänd triangel")
-            val2 = input("Val: ")
+            figur = rita_triangel(hojd, tecken, farg)
+            alla_figurer.append(("Triangel", figur))
 
-            if val2 == "1":
-                figur = rita_triangel(hojd, tecken, farg)
-                visa_eller_spara("Triangel", figur)
-
-            elif val2 == "2":
-                figur = rita_omvand_triangel(hojd, tecken, farg)
-                visa_eller_spara("Omvänd triangel", figur)
-
-        # === CIRKEL ===
+        # ---------------- CIRKEL ----------------
         elif val == "3":
             radie = int(input("Radie: "))
             tecken = input("Tecken: ")
             farg = valj_farg()
 
             figur = rita_cirkel(radie, tecken, farg)
-            visa_eller_spara("Cirkel", figur)
+            alla_figurer.append(("Cirkel", figur))
 
-        # === BLOMMA ===
+        # ---------------- BLOMMA ----------------
         elif val == "4":
             kronblad = int(input("Kronblad: "))
             storlek = int(input("Storlek: "))
@@ -227,25 +266,74 @@ def huvudprogram():
             farg = valj_farg()
 
             figur = rita_blomma(kronblad, storlek, tecken, farg)
-            visa_eller_spara("Blomma", figur)
+            alla_figurer.append(("Blomma", figur))
 
-        # === DIAMANT ===
+        # ---------------- OMVÄND TRIANGEL ----------------
         elif val == "5":
             hojd = int(input("Höjd: "))
             tecken = input("Tecken: ")
             farg = valj_farg()
 
-            figur = rita_diamant(hojd, tecken, farg)
-            visa_eller_spara("Diamant", figur)
+            figur = rita_omvand_triangel(hojd, tecken, farg)
+            alla_figurer.append(("Omvänd triangel", figur))
 
+        # ---------------- DIAMANT ----------------
         elif val == "6":
+            hojd = int(input("Höjd: "))
+            tecken = input("Tecken: ")
+            farg = valj_farg()
+
+            figur = rita_diamant(hojd, tecken, farg)
+            alla_figurer.append(("Diamant", figur))
+
+        # ---------------- IHÅLIG KVADRAT ----------------
+        elif val == "7":
+            sida = int(input("Sida: "))
+            tecken = input("Tecken: ")
+            farg = valj_farg()
+
+            figur = rita_ihalig_kvadrat(sida, tecken, farg)
+            alla_figurer.append(("Ihålig kvadrat", figur))
+
+        # ---------------- AVSLUT ----------------
+        elif val == "8":
             print("Hej då!")
             break
+
+        # ---------------- SPARA ----------------
+        elif val == "9":
+
+            if not alla_figurer:
+                print("Inga figurer att spara!")
+            else:
+                filnamn = input("Filnamn: ").strip()
+                spara_till_fil(alla_figurer, filnamn)
 
         else:
             print("Ogiltigt val.")
 
 
-# Starta programmet om filen körs direkt
+
+# === SPARA FIL ===
+
+def spara_till_fil(figurer, filnamn="figur.txt"):
+    """
+    Sparar alla ritade figurer till en textfil.
+    """
+
+    try:
+        with open(filnamn, "w", encoding="utf-8") as fil:
+
+            for namn, innehall in figurer:
+                fil.write(namn + "\n")
+                fil.write(innehall + "\n\n")
+
+        print(f"Figurer sparades i {filnamn}")
+
+    except Exception as e:
+        print("Fel vid sparning:", e)
+
+
+# === START ===
 if __name__ == "__main__":
     huvudprogram()
